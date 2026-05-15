@@ -44,6 +44,26 @@ abstract class User extends \App\Controller\Base\User
     }
 
     /**
+     * @param string|null $path
+     * @return string
+     */
+    protected function logoPath(?string $path): string
+    {
+        $path = $path ?: "/favicon.ico";
+        $assetPath = parse_url($path, PHP_URL_PATH) ?: $path;
+
+        if (preg_match('/^https?:\/\//i', $path)) {
+            return $path;
+        }
+
+        if ($assetPath && str_starts_with($assetPath, "/") && is_file(BASE_PATH . $assetPath)) {
+            return $path;
+        }
+
+        return "/favicon.ico";
+    }
+
+    /**
      * @param string $title
      * @param string $template
      * @param array $data
@@ -60,7 +80,7 @@ abstract class User extends \App\Controller\Base\User
             $data['title'] = $title;
             $data['app']['version'] = \config("app")['version'];
             $cfg = Config::list();
-            $data['favicon'] = $cfg['logo'] ?: "/favicon.ico";
+            $data['favicon'] = $this->logoPath($cfg['logo'] ?? null);
             $data['favicon_version'] = $this->assetVersion($data['favicon']);
 
             foreach ($cfg as $k => $v) {
@@ -92,7 +112,7 @@ abstract class User extends \App\Controller\Base\User
             $data['app']['version'] = \config("app")['version'];
 
             $cfg = Config::list();
-            $data['favicon'] = $cfg['logo'] ?: "/favicon.ico";
+            $data['favicon'] = $this->logoPath($cfg['logo'] ?? null);
 
             foreach ($cfg as $k => $v) {
                 $data["config"][$k] = $v;
@@ -136,6 +156,7 @@ abstract class User extends \App\Controller\Base\User
                 }
             }
 
+            $data['favicon'] = $this->logoPath($data['favicon']);
             $data['favicon_version'] = $this->assetVersion($data['favicon']);
 
             $defaultThemePath = "User/Theme/Cartoon/";

@@ -36,7 +36,7 @@
 <nav class="navbar navbar-expand-lg navbar-acg">
     <div class="container">
         <a class="navbar-brand hc-brand fw-bold d-flex align-items-center" href="/" aria-label="#{$config.shop_name}">
-            <img src="#{$favicon}?v=#{$favicon_version}" alt="#{$config.shop_name}" class="hc-brand-logo">
+            <img src="#{$favicon}?v=#{$favicon_version}" alt="" class="hc-brand-logo" onerror="this.onerror=null;this.src='/favicon.ico?v=#{$app.version}';">
             <span class="hc-brand-copy">
                 <span class="hc-brand-name">#{$config.shop_name}</span>
             </span>
