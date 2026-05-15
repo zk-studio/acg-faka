@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: acg-faka-php
+    container_name: ${COMPOSE_PROJECT_NAME:-acg-faka}-php
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
@@ -23,7 +23,7 @@ services:
 
   nginx:
     image: nginx:1.27-alpine
-    container_name: acg-faka-nginx
+    container_name: ${COMPOSE_PROJECT_NAME:-acg-faka}-nginx
     restart: unless-stopped
     ports:
       - "127.0.0.1:${ACG_HTTP_PORT:-18080}:80"
@@ -35,7 +35,7 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: acg-faka-mysql
+    container_name: ${COMPOSE_PROJECT_NAME:-acg-faka}-mysql
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
@@ -55,7 +55,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: acg-faka-redis
+    container_name: ${COMPOSE_PROJECT_NAME:-acg-faka}-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:

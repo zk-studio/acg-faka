@@ -57,6 +57,10 @@ if [ "$USE_DOCKER" = "1" ]; then
     cp .env.example .env
     echo "Created .env from .env.example. Review database passwords for production."
   fi
+  if ! grep -q '^COMPOSE_PROJECT_NAME=' .env 2>/dev/null; then
+    project_name="$(basename "$APP_DIR" | tr -cd '[:alnum:]_-')"
+    printf '\nCOMPOSE_PROJECT_NAME=%s\n' "$project_name" >> .env
+  fi
   $compose_cmd up -d --build
   if [ "$RUN_COMPOSER" = "1" ] || { [ "$RUN_COMPOSER" = "auto" ] && [ ! -f vendor/autoload.php ]; }; then
     $compose_cmd exec -T php composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader

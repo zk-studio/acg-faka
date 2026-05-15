@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
   workflow_dispatch:
 
 concurrency:
@@ -22,5 +23,15 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || '22' }}
           script: |
-            cd "${{ secrets.APP_DIR }}"
-            APP_DIR="${{ secrets.APP_DIR }}" BRANCH="${{ github.ref_name }}" bash scripts/server-update.sh
+            if [ "${{ github.ref_name }}" = "dev" ]; then
+              APP_DIR="/www/wwwroot/acg-faka-dev"
+              REPO="git@github.com:${{ github.repository }}.git"
+              if [ ! -d "$APP_DIR/.git" ]; then
+                rm -rf "$APP_DIR"
+                git clone -b dev "$REPO" "$APP_DIR"
+              fi
+            else
+              APP_DIR="${{ secrets.APP_DIR }}"
+            fi
+            cd "$APP_DIR"
+            APP_DIR="$APP_DIR" BRANCH="${{ github.ref_name }}" USE_DOCKER=1 bash scripts/server-update.sh
