@@ -59,9 +59,9 @@ abstract class User extends \App\Controller\Base\User
 
             $data['title'] = $title;
             $data['app']['version'] = \config("app")['version'];
-            $data['favicon'] = "/favicon.ico";
-            $data['favicon_version'] = $this->assetVersion($data['favicon']);
             $cfg = Config::list();
+            $data['favicon'] = $cfg['logo'] ?: "/favicon.ico";
+            $data['favicon_version'] = $this->assetVersion($data['favicon']);
 
             foreach ($cfg as $k => $v) {
                 $data["config"][$k] = $v;
@@ -90,9 +90,9 @@ abstract class User extends \App\Controller\Base\User
 
             $data['title'] = $title;
             $data['app']['version'] = \config("app")['version'];
-            $data['favicon'] = "/favicon.ico";
 
             $cfg = Config::list();
+            $data['favicon'] = $cfg['logo'] ?: "/favicon.ico";
 
             foreach ($cfg as $k => $v) {
                 $data["config"][$k] = $v;
