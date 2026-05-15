@@ -26,6 +26,24 @@ abstract class User extends \App\Controller\Base\User
     ];
 
     /**
+     * @param string $path
+     * @return int|string
+     */
+    protected function assetVersion(string $path): int|string
+    {
+        $assetPath = parse_url($path, PHP_URL_PATH) ?: $path;
+
+        if ($assetPath && str_starts_with($assetPath, "/")) {
+            $file = BASE_PATH . $assetPath;
+            if (is_file($file)) {
+                return filemtime($file);
+            }
+        }
+
+        return \config("app")['version'];
+    }
+
+    /**
      * @param string $title
      * @param string $template
      * @param array $data
@@ -41,6 +59,8 @@ abstract class User extends \App\Controller\Base\User
 
             $data['title'] = $title;
             $data['app']['version'] = \config("app")['version'];
+            $data['favicon'] = "/favicon.ico";
+            $data['favicon_version'] = $this->assetVersion($data['favicon']);
             $cfg = Config::list();
 
             foreach ($cfg as $k => $v) {
@@ -115,6 +135,8 @@ abstract class User extends \App\Controller\Base\User
                     $data['favicon'] = $businessUser->avatar;
                 }
             }
+
+            $data['favicon_version'] = $this->assetVersion($data['favicon']);
 
             $defaultThemePath = "User/Theme/Cartoon/";
             $themePath = "User/Theme/{$theme}/";
