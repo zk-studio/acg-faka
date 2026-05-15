@@ -8,6 +8,7 @@ COMPOSER_BIN="${COMPOSER_BIN:-composer}"
 WEB_USER="${WEB_USER:-www}"
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"
 USE_DOCKER="${USE_DOCKER:-auto}"
+RUN_COMPOSER="${RUN_COMPOSER:-auto}"
 
 cd "$APP_DIR"
 
@@ -57,9 +58,13 @@ if [ "$USE_DOCKER" = "1" ]; then
     echo "Created .env from .env.example. Review database passwords for production."
   fi
   $compose_cmd up -d --build
-  $compose_cmd exec -T php composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+  if [ "$RUN_COMPOSER" = "1" ] || { [ "$RUN_COMPOSER" = "auto" ] && [ ! -f vendor/autoload.php ]; }; then
+    $compose_cmd exec -T php composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+  fi
 else
-  if command -v "$COMPOSER_BIN" >/dev/null 2>&1; then
+  if [ "$RUN_COMPOSER" = "0" ]; then
+    echo "Composer installation skipped."
+  elif command -v "$COMPOSER_BIN" >/dev/null 2>&1; then
     "$COMPOSER_BIN" install --no-dev --prefer-dist --no-interaction --optimize-autoloader
   else
     echo "Composer not found, skipped dependency installation."
