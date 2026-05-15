@@ -51,9 +51,29 @@ class Config extends Manage
 
         $keys[] = "logo";
         $file = $post['logo'] ?: '/favicon.ico';
-        $post['logo'] = $file;
-        if ($file != '/favicon.ico' && is_file(BASE_PATH . $file)) {
-            @copy(BASE_PATH . $file, BASE_PATH . '/favicon.ico');
+        $post['logo'] = '/favicon.ico';
+
+        if ($file != '/favicon.ico') {
+            $sourcePath = parse_url($file, PHP_URL_PATH) ?: $file;
+            $sourceFile = BASE_PATH . $sourcePath;
+
+            if (is_file($sourceFile)) {
+                $extension = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION)) ?: 'png';
+                if (!in_array($extension, ['png', 'jpg', 'jpeg', 'ico', 'webp', 'gif'])) {
+                    $extension = 'png';
+                }
+
+                $targetPath = "/assets/cache/general/image/site-logo.{$extension}";
+                $targetFile = BASE_PATH . $targetPath;
+                if ($sourceFile !== $targetFile) {
+                    @copy($sourceFile, $targetFile);
+                }
+
+                if (is_file($targetFile)) {
+                    $post['logo'] = $targetPath;
+                    @copy($targetFile, BASE_PATH . '/favicon.ico');
+                }
+            }
         }
         try {
             if (isset($post['ip_get_mode'])) {
