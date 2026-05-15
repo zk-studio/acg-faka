@@ -5,6 +5,24 @@
 </footer>
 #{/if}
 
+<button class="mimi-pet-toggle" type="button" aria-label="收起界面，只看背景" aria-pressed="false" title="收起界面，只看背景">
+    <span class="mimi-pet" aria-hidden="true">
+        <span class="mimi-ear mimi-ear-left"></span>
+        <span class="mimi-ear mimi-ear-right"></span>
+        <span class="mimi-face">
+            <span class="mimi-eye mimi-eye-left"></span>
+            <span class="mimi-eye mimi-eye-right"></span>
+            <span class="mimi-mouth"></span>
+        </span>
+        <span class="mimi-paw mimi-paw-left"></span>
+        <span class="mimi-paw mimi-paw-right"></span>
+    </span>
+    <span class="mimi-pet-menu">
+        <span class="mimi-pet-text">收起界面</span>
+        <span class="mimi-pet-hint">只看背景</span>
+    </span>
+</button>
+
 #{js(
 [
 "/assets/common/js/_.js",
@@ -41,6 +59,32 @@
 "/assets/user/js/trade.js",
 "/assets/user/js/treasure.js"
 ])}
+<script>
+    (function () {
+        var petToggle = document.querySelector('.mimi-pet-toggle');
+        var petText = document.querySelector('.mimi-pet-text');
+        var petHint = document.querySelector('.mimi-pet-hint');
+
+        if (!petToggle) {
+            return;
+        }
+
+        petToggle.addEventListener('click', function () {
+            var isSceneMode = document.body.classList.toggle('is-scene-mode');
+            petToggle.setAttribute('aria-pressed', isSceneMode ? 'true' : 'false');
+            petToggle.setAttribute('aria-label', isSceneMode ? '恢复界面' : '收起界面，只看背景');
+            petToggle.setAttribute('title', isSceneMode ? '恢复界面' : '收起界面，只看背景');
+
+            if (petText) {
+                petText.textContent = isSceneMode ? '恢复界面' : '收起界面';
+            }
+
+            if (petHint) {
+                petHint.textContent = isSceneMode ? '回到店铺' : '只看背景';
+            }
+        });
+    })();
+</script>
 <!--start::HOOK-->
 #{hook(\App\Consts\Hook::USER_GLOBAL_VIEW_BODY)}
 #{hook(\App\Consts\Hook::USER_VIEW_INDEX_BODY)}

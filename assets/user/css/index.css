@@ -1745,3 +1745,298 @@ footer {
     padding: 8px 0;
     color: #858585;
 }
+
+.hc-brand {
+    gap: 10px;
+    min-width: 0;
+    padding: 2px 0;
+}
+
+.hc-brand-mark {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ff8aa0 0%, #ffaebc 54%, #fff1f4 100%);
+    box-shadow: 0 9px 22px rgba(255, 119, 145, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.hc-brand-mark::after {
+    content: "";
+    position: absolute;
+    right: -3px;
+    top: 6px;
+    width: 8px;
+    height: 14px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.82);
+    transform: rotate(-14deg);
+}
+
+.hc-brand-card {
+    position: relative;
+    z-index: 1;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1;
+}
+
+.hc-brand-copy {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+    line-height: 1.05;
+}
+
+.hc-brand-name {
+    color: #64be8d;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.hc-brand-subtitle {
+    color: #9aa4b2;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.mimi-pet-toggle {
+    position: fixed;
+    right: 22px;
+    bottom: 20px;
+    z-index: 1080;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 76px;
+    height: 72px;
+    border: 0;
+    padding: 0;
+    border-radius: 20px;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    filter: drop-shadow(0 10px 20px rgba(31, 41, 55, 0.18));
+}
+
+.mimi-pet-toggle:focus-visible {
+    box-shadow: 0 0 0 4px rgba(255, 138, 160, 0.28);
+}
+
+.mimi-pet {
+    position: relative;
+    display: block;
+    width: 58px;
+    height: 54px;
+    transform-origin: 50% 100%;
+    animation: mimiFloat 3.2s ease-in-out infinite;
+}
+
+.mimi-ear {
+    position: absolute;
+    top: 2px;
+    width: 18px;
+    height: 23px;
+    border: 3px solid #f59eb0;
+    border-bottom: 0;
+    background: #fff7fa;
+    z-index: 1;
+}
+
+.mimi-ear-left {
+    left: 7px;
+    border-radius: 16px 10px 8px 8px;
+    transform: rotate(-25deg);
+}
+
+.mimi-ear-right {
+    right: 7px;
+    border-radius: 10px 16px 8px 8px;
+    transform: rotate(25deg);
+}
+
+.mimi-face {
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    bottom: 0;
+    height: 43px;
+    border: 3px solid #f59eb0;
+    border-radius: 18px 18px 16px 16px;
+    background: linear-gradient(180deg, #fff9fb 0%, #ffffff 68%, #ffe6ec 100%);
+    box-shadow: inset 0 -8px 0 rgba(255, 172, 188, 0.2);
+    z-index: 2;
+}
+
+.mimi-eye {
+    position: absolute;
+    top: 16px;
+    width: 6px;
+    height: 10px;
+    border-radius: 99px;
+    background: #3f3f46;
+}
+
+.mimi-eye-left {
+    left: 15px;
+}
+
+.mimi-eye-right {
+    right: 15px;
+}
+
+.mimi-mouth {
+    position: absolute;
+    left: 50%;
+    top: 28px;
+    width: 11px;
+    height: 6px;
+    border-bottom: 2px solid #f08ca2;
+    border-radius: 0 0 12px 12px;
+    transform: translateX(-50%);
+}
+
+.mimi-paw {
+    position: absolute;
+    bottom: 1px;
+    width: 13px;
+    height: 8px;
+    border-radius: 99px;
+    background: #ffd1dc;
+    z-index: 3;
+}
+
+.mimi-paw-left {
+    left: 10px;
+}
+
+.mimi-paw-right {
+    right: 10px;
+}
+
+.mimi-pet-menu {
+    position: absolute;
+    right: 62px;
+    bottom: 13px;
+    display: grid;
+    gap: 1px;
+    min-width: 92px;
+    padding: 9px 12px;
+    border: 1px solid rgba(255, 188, 201, 0.66);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #374151;
+    text-align: left;
+    white-space: nowrap;
+    box-shadow: 0 14px 34px rgba(31, 41, 55, 0.12);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(8px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.mimi-pet-menu::after {
+    content: "";
+    position: absolute;
+    right: -7px;
+    bottom: 18px;
+    width: 12px;
+    height: 12px;
+    border-right: 1px solid rgba(255, 188, 201, 0.66);
+    border-bottom: 1px solid rgba(255, 188, 201, 0.66);
+    background: rgba(255, 255, 255, 0.92);
+    transform: rotate(-45deg);
+}
+
+.mimi-pet-toggle:hover .mimi-pet-menu,
+.mimi-pet-toggle:focus-visible .mimi-pet-menu {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.mimi-pet-text {
+    color: #f0728f;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.mimi-pet-hint {
+    color: #7d8796;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+body.is-scene-mode {
+    overflow: hidden;
+}
+
+body.is-scene-mode .navbar-acg,
+body.is-scene-mode #pjax-container,
+body.is-scene-mode > footer {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-12px);
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
+}
+
+body.is-scene-mode .mimi-pet-toggle {
+    right: 24px;
+    bottom: 24px;
+}
+
+body.is-scene-mode .mimi-pet {
+    animation-duration: 2.2s;
+}
+
+body.is-scene-mode .mimi-face {
+    box-shadow: inset 0 -8px 0 rgba(255, 172, 188, 0.2), 0 0 0 8px rgba(255, 255, 255, 0.28);
+}
+
+@keyframes mimiFloat {
+    0%,
+    100% {
+        transform: translateY(0) rotate(-1deg);
+    }
+
+    50% {
+        transform: translateY(-7px) rotate(1deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .hc-brand-name {
+        font-size: 18px;
+    }
+
+    .hc-brand-subtitle {
+        display: none;
+    }
+
+    .mimi-pet-toggle {
+        right: 14px;
+        bottom: 14px;
+        width: 66px;
+        height: 64px;
+    }
+
+    .mimi-pet {
+        transform: scale(0.88);
+    }
+
+    .mimi-pet-menu {
+        display: none;
+    }
+}
