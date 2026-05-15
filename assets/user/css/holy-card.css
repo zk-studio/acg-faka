@@ -4,6 +4,16 @@
     padding: 2px 0;
 }
 
+.hc-brand-logo {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #ff8aa0 0%, #ffaebc 54%, #fff1f4 100%);
+    box-shadow: 0 9px 22px rgba(255, 119, 145, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
 .hc-brand-mark {
     position: relative;
     display: inline-flex;
@@ -271,6 +281,12 @@ body.is-scene-mode .mimi-face {
 @media (max-width: 768px) {
     .hc-brand-name {
         font-size: 18px;
+    }
+
+    .hc-brand-logo {
+        width: 30px;
+        height: 30px;
+        flex-basis: 30px;
     }
 
     .hc-brand-subtitle {
