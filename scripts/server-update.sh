@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DIR="${APP_DIR:-/www/wwwroot/acg-faka}"
+BRANCH="${BRANCH:-main}"
+PHP_BIN="${PHP_BIN:-php}"
+COMPOSER_BIN="${COMPOSER_BIN:-composer}"
+WEB_USER="${WEB_USER:-www}"
+PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"
+USE_DOCKER="${USE_DOCKER:-auto}"
+
+cd "$APP_DIR"
+
+mkdir -p runtime
+exec 9>"$APP_DIR/runtime/deploy.lock"
+if ! flock -n 9; then
+  echo "Another deployment is running."
+  exit 1
+fi
+
+if [ ! -d .git ]; then
+  echo "$APP_DIR is not a git repository."
+  exit 1
+fi
+
+# These files are created or changed by the installer/admin panel on the server.
+git update-index --skip-worktree config/database.php 2>/dev/null || true
+git update-index --skip-worktree config/store.php 2>/dev/null || true
+
+git fetch --prune origin "$BRANCH"
+
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$current_branch" != "$BRANCH" ]; then
+  git checkout "$BRANCH"
+fi
+
+git pull --ff-only origin "$BRANCH"
+
+compose_cmd=""
+if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+  compose_cmd="docker compose"
+elif command -v docker-compose >/dev/null 2>&1; then
+  compose_cmd="docker-compose"
+fi
+
+if [ "$USE_DOCKER" = "auto" ] && [ -n "$compose_cmd" ] && [ -f docker-compose.yml ]; then
+  USE_DOCKER=1
+fi
+
+if [ "$USE_DOCKER" = "1" ]; then
+  if [ -z "$compose_cmd" ]; then
+    echo "Docker Compose is not available."
+    exit 1
+  fi
+  if [ ! -f .env ] && [ -f .env.example ]; then
+    cp .env.example .env
+    echo "Created .env from .env.example. Review database passwords for production."
+  fi
+  $compose_cmd up -d --build
+  $compose_cmd exec -T php composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+else
+  if command -v "$COMPOSER_BIN" >/dev/null 2>&1; then
+    "$COMPOSER_BIN" install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+  else
+    echo "Composer not found, skipped dependency installation."
+  fi
+fi
+
+mkdir -p runtime runtime/view runtime/plugin assets/cache
+rm -rf runtime/view/*
+
+if [ "$USE_DOCKER" = "1" ] && [ "$(id -u)" = "0" ]; then
+  chown -R 33:33 runtime assets/cache kernel/Install config
+elif [ "$(id -u)" = "0" ] && id "$WEB_USER" >/dev/null 2>&1; then
+  chown -R "$WEB_USER:$WEB_USER" runtime assets/cache kernel/Install config
+fi
+
+find runtime assets/cache -type d -exec chmod 775 {} \; 2>/dev/null || true
+find runtime assets/cache -type f -exec chmod 664 {} \; 2>/dev/null || true
+
+if [ "$USE_DOCKER" = "1" ]; then
+  $compose_cmd restart php nginx >/dev/null
+elif [ -n "$PHP_FPM_SERVICE" ] && command -v systemctl >/dev/null 2>&1; then
+  systemctl reload "$PHP_FPM_SERVICE"
+elif command -v "$PHP_BIN" >/dev/null 2>&1; then
+  "$PHP_BIN" -r 'function_exists("opcache_reset") && opcache_reset();' >/dev/null 2>&1 || true
+fi
+
+echo "Deployment completed: $(date '+%Y-%m-%d %H:%M:%S')"

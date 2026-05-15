@@ -1,0 +1,10 @@
+.git
+.github
+runtime
+runtime.log
+assets/cache
+kernel/Install/OS
+kernel/Install/Update
+kernel/Install/Install.sql.tmp
+*.log
+*.tmp

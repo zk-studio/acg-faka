@@ -2,3 +2,7 @@
 *.css linguist-language=php
 *.html linguist-language=php
 *.php linguist-language=php
+.gitattributes text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.sh text eol=lf

@@ -1,0 +1,12 @@
+/runtime/
+/runtime.log
+/assets/cache/
+/kernel/Install/Lock
+/kernel/Install/Install.sql.tmp
+/kernel/Install/OS/
+/kernel/Install/Update/
+/config/store.php
+/config/terms
+/.env
+*.log
+*.tmp
