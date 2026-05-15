@@ -35,7 +35,7 @@ if [ "$current_branch" != "$BRANCH" ]; then
   git checkout "$BRANCH"
 fi
 
-git pull --ff-only origin "$BRANCH"
+git reset --hard "origin/$BRANCH"
 
 compose_cmd=""
 if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
