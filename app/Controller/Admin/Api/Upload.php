@@ -84,15 +84,27 @@ class Upload extends Manage
                 $extension = 'png';
             }
 
+            // 清掉其他扩展名的旧 logo，避免预览拿到上一张
+            foreach (['png', 'jpg', 'jpeg', 'ico', 'webp', 'gif'] as $ext) {
+                if ($ext === $extension) {
+                    continue;
+                }
+                $stale = BASE_PATH . "/assets/cache/general/image/site-logo.{$ext}";
+                if (is_file($stale)) {
+                    @unlink($stale);
+                }
+            }
+
             $targetPath = "/assets/cache/general/image/site-logo.{$extension}";
             $targetFile = BASE_PATH . $targetPath;
+            @mkdir(dirname($targetFile), 0775, true);
+
             if (BASE_PATH . $fileName !== $targetFile) {
                 @copy(BASE_PATH . $fileName, $targetFile);
             }
 
             if (is_file($targetFile)) {
                 CFG::put("logo", $targetPath);
-                @copy($targetFile, BASE_PATH . "/favicon.ico");
                 $fileName = $targetPath;
             }
         }

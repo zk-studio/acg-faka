@@ -38,6 +38,83 @@ class Config extends Manage
     private Email $email;
 
     /**
+     * 解析后台保存时传来的 logo 字段，决定真正落库的值。
+     *
+     * - 远程 http(s) 直接保留
+     * - 本地资源：把上传产物搬到 /assets/cache/general/image/site-logo.<ext> 这个稳定路径，
+     *   避免下一次部署 git reset 把它冲掉，也避免 favicon.ico 被默认 logo 覆盖。
+     * - 已经位于稳定路径或仅文件名不同：原样接受
+     * - 不可识别 / 文件不存在：fallback 到 /favicon.ico
+     */
+    private function resolveLogoPath(string $input): string
+    {
+        $fallback = '/favicon.ico';
+        $input = trim($input);
+
+        if ($input === '') {
+            return $fallback;
+        }
+
+        // 远程地址直接接受
+        if (preg_match('#^https?://#i', $input)) {
+            return $input;
+        }
+
+        $path = parse_url($input, PHP_URL_PATH) ?: $input;
+        if (!is_string($path) || $path === '' || !str_starts_with($path, '/')) {
+            return $fallback;
+        }
+
+        // 防止越权
+        if (str_contains($path, '..')) {
+            return $fallback;
+        }
+
+        // 用户什么都没改，直接保留默认 favicon
+        if ($path === $fallback) {
+            return $fallback;
+        }
+
+        $sourceFile = BASE_PATH . $path;
+        if (!is_file($sourceFile)) {
+            return $fallback;
+        }
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if (!in_array($extension, ['png', 'jpg', 'jpeg', 'ico', 'webp', 'gif'], true)) {
+            $extension = 'png';
+        }
+
+        $targetPath = "/assets/cache/general/image/site-logo.{$extension}";
+        $targetFile = BASE_PATH . $targetPath;
+
+        // 已经是稳定路径，直接复用
+        if ($sourceFile === $targetFile) {
+            return $targetPath;
+        }
+
+        @mkdir(dirname($targetFile), 0775, true);
+
+        // 清掉旧扩展名的同名 logo，防止前端预览拿到不同扩展的旧文件
+        foreach (['png', 'jpg', 'jpeg', 'ico', 'webp', 'gif'] as $ext) {
+            if ($ext === $extension) {
+                continue;
+            }
+            $stale = BASE_PATH . "/assets/cache/general/image/site-logo.{$ext}";
+            if (is_file($stale)) {
+                @unlink($stale);
+            }
+        }
+
+        if (!@copy($sourceFile, $targetFile)) {
+            // 复制失败但源文件确实存在，至少把原始路径保留下来
+            return $path;
+        }
+
+        return $targetPath;
+    }
+
+    /**
      * @param Request $request
      * @return array
      * @throws JSONException
@@ -50,31 +127,8 @@ class Config extends Manage
         $inits = ["closed", "registered_state", "registered_type", "registered_verification", "registered_phone_verification", "registered_email_verification", "login_verification", "forget_type", "trade_verification", "session_expire", "request_log"]; //需要初始化的字段
 
         $keys[] = "logo";
-        $file = $post['logo'] ?: '/favicon.ico';
-        $post['logo'] = '/favicon.ico';
-
-        if ($file != '/favicon.ico') {
-            $sourcePath = parse_url($file, PHP_URL_PATH) ?: $file;
-            $sourceFile = BASE_PATH . $sourcePath;
-
-            if (is_file($sourceFile)) {
-                $extension = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION)) ?: 'png';
-                if (!in_array($extension, ['png', 'jpg', 'jpeg', 'ico', 'webp', 'gif'])) {
-                    $extension = 'png';
-                }
-
-                $targetPath = "/assets/cache/general/image/site-logo.{$extension}";
-                $targetFile = BASE_PATH . $targetPath;
-                if ($sourceFile !== $targetFile) {
-                    @copy($sourceFile, $targetFile);
-                }
-
-                if (is_file($targetFile)) {
-                    $post['logo'] = $targetPath;
-                    @copy($targetFile, BASE_PATH . '/favicon.ico');
-                }
-            }
-        }
+        $logoInput = (string)($post['logo'] ?? '');
+        $post['logo'] = $this->resolveLogoPath($logoInput);
         try {
             if (isset($post['ip_get_mode'])) {
                 Client::setClientMode((int)$post['ip_get_mode']);

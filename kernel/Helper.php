@@ -287,6 +287,23 @@ if (!function_exists("Plugin")) {
 }
 
 
+if (!function_exists('asset_version')) {
+    /**
+     * 给静态资源生成 cache buster：本地文件优先用 mtime，否则退回 APP_VERSION。
+     */
+    function asset_version(string $resource): string
+    {
+        $path = parse_url($resource, PHP_URL_PATH) ?: $resource;
+        if (is_string($path) && $path !== '' && str_starts_with($path, '/')) {
+            $file = BASE_PATH . $path;
+            if (is_file($file)) {
+                return (string)filemtime($file);
+            }
+        }
+        return APP_VERSION;
+    }
+}
+
 if (!function_exists("css")) {
     function css(array|string $resource, array|string|null $backup = null, bool $cdn = true): string
     {
@@ -298,10 +315,10 @@ if (!function_exists("css")) {
         $cdnSupport = $cdn ? 'class="cdn-support"' : '';
         if (is_array($resource)) {
             foreach ($resource as $item) {
-                $res .= sprintf('<link rel="stylesheet" href="%s" ' . $cdnSupport . '>', $item . '?v=' . APP_VERSION . $debugRandom);
+                $res .= sprintf('<link rel="stylesheet" href="%s" ' . $cdnSupport . '>', $item . '?v=' . asset_version($item) . $debugRandom);
             }
         } else {
-            $res = sprintf('<link rel="stylesheet" href="%s" ' . $cdnSupport . '>', $resource . '?v=' . APP_VERSION . $debugRandom);
+            $res = sprintf('<link rel="stylesheet" href="%s" ' . $cdnSupport . '>', $resource . '?v=' . asset_version($resource) . $debugRandom);
         }
         return $res;
     }
@@ -318,10 +335,10 @@ if (!function_exists("js")) {
         $cdnSupport = $cdn ? ' class="cdn-support"' : '';
         if (is_array($resource)) {
             foreach ($resource as $item) {
-                $res .= sprintf('<script src="%s" ' . $cdnSupport . '></script>', $item . (str_contains($item, "?") ? "&" : "?") . 'v=' . APP_VERSION . $debugRandom);
+                $res .= sprintf('<script src="%s" ' . $cdnSupport . '></script>', $item . (str_contains($item, "?") ? "&" : "?") . 'v=' . asset_version($item) . $debugRandom);
             }
         } else {
-            $res = sprintf('<script src="%s" ' . $cdnSupport . '></script>', $resource . (str_contains($resource, "?") ? "&" : "?") . 'v=' . APP_VERSION . $debugRandom);
+            $res = sprintf('<script src="%s" ' . $cdnSupport . '></script>', $resource . (str_contains($resource, "?") ? "&" : "?") . 'v=' . asset_version($resource) . $debugRandom);
         }
         return $res;
     }
@@ -359,7 +376,7 @@ if (!function_exists("ready")) {
         foreach ($variable as $key => $value) {
             $var .= "setVar('{$key}' , " . _ready_get_value($value) . ");";
         }
-        return '<script>' . $var . 'ready("' . $resource . (str_contains($resource, "?") ? "&" : "?") . 'v=' . APP_VERSION . (DEBUG ? "&debug=" . Str::generateRandStr(8) : '') . '");</script>';
+        return '<script>' . $var . 'ready("' . $resource . (str_contains($resource, "?") ? "&" : "?") . 'v=' . asset_version($resource) . (DEBUG ? "&debug=" . Str::generateRandStr(8) : '') . '");</script>';
     }
 }
 
