@@ -111,6 +111,9 @@ class Config extends Manage
             return $path;
         }
 
+        // 推进 mtime，让前台 ?v=mtime 这种 cache buster 能发现变更
+        @touch($targetFile);
+
         return $targetPath;
     }
 

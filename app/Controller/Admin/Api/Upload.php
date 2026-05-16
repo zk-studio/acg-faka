@@ -45,6 +45,7 @@ class Upload extends Manage
     {
         $type = strtolower((string)$request->get("mime"));
         $thumbHeight = (int)$request->get("thumb_height");
+        $isSiteLogo = $type === 'image' && (int)$request->get("site_logo") === 1;
 
         if (!in_array($type, self::MIME)) {
             throw new JSONException("mime not supported");
@@ -57,28 +58,10 @@ class Upload extends Manage
 
         $fileName = $static_path . $handle['new_name'];
 
-        if ($tmp = $this->upload->get(md5_file(BASE_PATH . $fileName))) {
-            File::remove(BASE_PATH . $fileName);
-            $fileName = $tmp;
-        } else {
-            $this->upload->add($fileName, $type);
-        }
-
-        $append = [];
-        //生成缩略图
-        if ($type == self::MIME[0] && $thumbHeight > 0) {
-            $imageFile = BASE_PATH . $fileName;
-            $thumbUrl = $this->image->createThumbnail($fileName, $thumbHeight);
-            if (!$thumbUrl) {
-                if (is_file($imageFile)) {
-                    $this->upload->remove($fileName);
-                }
-                throw new JSONException("图片上传失败，原因：生成缩略图失败");
-            }
-            $append['thumb_url'] = $thumbUrl;
-        }
-
-        if ($type == self::MIME[0] && (int)$request->get("site_logo") == 1) {
+        // 站点 LOGO 走独立分支：跳过通用图床的 hash 去重，
+        // 否则只要历史上传过相同 md5 的图，新文件会被删掉、URL 退回旧文件，
+        // 导致页面始终显示之前那张 logo。
+        if ($isSiteLogo) {
             $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION)) ?: 'png';
             if (!in_array($extension, ['png', 'jpg', 'jpeg', 'ico', 'webp', 'gif'])) {
                 $extension = 'png';
@@ -99,14 +82,42 @@ class Upload extends Manage
             $targetFile = BASE_PATH . $targetPath;
             @mkdir(dirname($targetFile), 0775, true);
 
+            // 强制把这次上传的内容覆盖到稳定路径
+            @copy(BASE_PATH . $fileName, $targetFile);
+            // 顺便把刚落盘的那张随机命名文件清掉，免得堆积
             if (BASE_PATH . $fileName !== $targetFile) {
-                @copy(BASE_PATH . $fileName, $targetFile);
+                @unlink(BASE_PATH . $fileName);
             }
+            // 触发 URL 层 cache buster
+            @touch($targetFile);
 
             if (is_file($targetFile)) {
                 CFG::put("logo", $targetPath);
-                $fileName = $targetPath;
+                return $this->json(200, '上传成功', ["url" => $targetPath, "append" => []]);
             }
+
+            throw new JSONException("LOGO 写入失败");
+        }
+
+        if ($tmp = $this->upload->get(md5_file(BASE_PATH . $fileName))) {
+            File::remove(BASE_PATH . $fileName);
+            $fileName = $tmp;
+        } else {
+            $this->upload->add($fileName, $type);
+        }
+
+        $append = [];
+        //生成缩略图
+        if ($type == self::MIME[0] && $thumbHeight > 0) {
+            $imageFile = BASE_PATH . $fileName;
+            $thumbUrl = $this->image->createThumbnail($fileName, $thumbHeight);
+            if (!$thumbUrl) {
+                if (is_file($imageFile)) {
+                    $this->upload->remove($fileName);
+                }
+                throw new JSONException("图片上传失败，原因：生成缩略图失败");
+            }
+            $append['thumb_url'] = $thumbUrl;
         }
 
         return $this->json(200, '上传成功', ["url" => $fileName, "append" => $append]);
