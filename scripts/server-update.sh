@@ -76,12 +76,16 @@ else
 fi
 
 mkdir -p runtime runtime/view runtime/plugin assets/cache
+mkdir -p app/Plugin app/Pay app/View/User/Theme kernel/Install/OS
 rm -rf runtime/view/*
 
 if [ "$USE_DOCKER" = "1" ] && [ "$(id -u)" = "0" ]; then
-  chown -R 33:33 runtime assets/cache kernel/Install config
+  # 让容器里的 www-data (uid 33) 能写：插件商店下载/解压、上传缓存、安装锁文件、配置
+  chown -R 33:33 runtime assets/cache kernel/Install config \
+                 app/Plugin app/Pay app/View/User/Theme
 elif [ "$(id -u)" = "0" ] && id "$WEB_USER" >/dev/null 2>&1; then
-  chown -R "$WEB_USER:$WEB_USER" runtime assets/cache kernel/Install config
+  chown -R "$WEB_USER:$WEB_USER" runtime assets/cache kernel/Install config \
+                                  app/Plugin app/Pay app/View/User/Theme
 fi
 
 find runtime assets/cache -type d -exec chmod 775 {} \; 2>/dev/null || true
