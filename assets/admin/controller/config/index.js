@@ -93,11 +93,11 @@
 
     function _UploadLogoAndBackground() {
 
-        util.bindButtonUpload(".upload-logo", "/admin/api/upload/send?mime=image", data => {
+        util.bindButtonUpload(".upload-logo", "/admin/api/upload/send?mime=image&site_logo=1", data => {
             $('input[name=logo]').val(data.url);
-            layer.msg('图标上传成功，但需要保存后才会生效');
+            layer.msg('图标上传成功，已立即生效');
             $('.image-input-wrapper').css({
-                "background-image": `url(${data.url})`
+                "background-image": `url(${data.url}?v=${Date.now()})`
             });
         });
 

@@ -7,6 +7,7 @@ namespace App\Controller\Admin\Api;
 use App\Controller\Base\API\Manage;
 use App\Entity\Query\Get;
 use App\Interceptor\ManageSession;
+use App\Model\Config as CFG;
 use App\Service\Image;
 use App\Service\Query;
 use Kernel\Annotation\Inject;
@@ -75,6 +76,25 @@ class Upload extends Manage
                 throw new JSONException("图片上传失败，原因：生成缩略图失败");
             }
             $append['thumb_url'] = $thumbUrl;
+        }
+
+        if ($type == self::MIME[0] && (int)$request->get("site_logo") == 1) {
+            $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION)) ?: 'png';
+            if (!in_array($extension, ['png', 'jpg', 'jpeg', 'ico', 'webp', 'gif'])) {
+                $extension = 'png';
+            }
+
+            $targetPath = "/assets/cache/general/image/site-logo.{$extension}";
+            $targetFile = BASE_PATH . $targetPath;
+            if (BASE_PATH . $fileName !== $targetFile) {
+                @copy(BASE_PATH . $fileName, $targetFile);
+            }
+
+            if (is_file($targetFile)) {
+                CFG::put("logo", $targetPath);
+                @copy($targetFile, BASE_PATH . "/favicon.ico");
+                $fileName = $targetPath;
+            }
         }
 
         return $this->json(200, '上传成功', ["url" => $fileName, "append" => $append]);
