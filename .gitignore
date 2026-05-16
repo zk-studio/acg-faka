@@ -10,3 +10,10 @@
 /.env
 *.log
 *.tmp
+
+# 商店里下载安装的支付插件、通用插件、模板都不入库，
+# 由 acg-faka 后台/应用商店在服务器本地维护，避免 git reset 时被覆盖或冲突
+/app/Pay/*/
+/app/Plugin/
+/app/View/User/Theme/*/
+!/app/View/User/Theme/Cartoon/
