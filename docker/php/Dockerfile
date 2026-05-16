@@ -9,7 +9,7 @@ RUN apt-get update \
         libpng-dev \
         libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" pdo_mysql gd zip opcache \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql gd zip opcache bcmath \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apt-get clean \
